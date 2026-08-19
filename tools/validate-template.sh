@@ -65,7 +65,7 @@ check_required_files() {
     "docs/doctrine/README.md"
     "docs/doctrine/coding.md"
     "docs/doctrine/doctrine-governance.md"
-    "docs/doctrine/identity.md"
+    "docs/doctrine/export-policy.md"
     "docs/doctrine/naming.md"
     "docs/doctrine/project-standards.md"
     "docs/doctrine/repo-management.md"
@@ -106,6 +106,15 @@ check_markdown_parse_sanity() {
       core_fail "Markdown file has no heading: $rel"
     fi
   done < <(cd "$ROOT_DIR" && rg --files -g '*.md')
+}
+
+check_public_export_boundary() {
+  local matches
+  matches="$(cd "$ROOT_DIR" && rg -n -i '(TinMan|LooseWire|TinkerSpace|George Gil|Primary engineering identity|Real/legal identity)' AGENTS.md AI_CONTEXT.md docs/doctrine 2>/dev/null || true)"
+  if [[ -n "$matches" ]]; then
+    core_fail "Public doctrine snapshot contains maintainer identity content"
+    printf '%s\n' "$matches"
+  fi
 }
 
 check_local_markdown_links() {
@@ -228,6 +237,7 @@ run_core() {
   check_required_files
   check_doc_structure
   check_markdown_parse_sanity
+  check_public_export_boundary
 
   if [[ $core_errors -gt 0 ]]; then
     echo "Core validation failed with ${core_errors} issue(s)."
